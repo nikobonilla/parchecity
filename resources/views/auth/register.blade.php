@@ -2,61 +2,46 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        <div class="mb-3">
+            <label for="name" class="form-label">Nombre</label>
+            <input id="name" type="text" name="name" class="form-control" value="{{ old('name') }}" required autofocus>
+            @error('name') <div class="text-danger small">{{ $message }}</div> @enderror
         </div>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="mb-3">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input id="email" type="email" name="email" class="form-control" value="{{ old('email') }}" required>
+            @error('email') <div class="text-danger small">{{ $message }}</div> @enderror
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input id="password" type="password" name="password" class="form-control" required>
+            @error('password') <div class="text-danger small">{{ $message }}</div> @enderror
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        <div class="mb-3">
+            <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
+            <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" required>
         </div>
 
-        <!-- Rol -->
-        <div class="mt-4">
-            <x-input-label for="rol" :value="__('Tipo de cuenta')" />
-            <select id="rol" name="rol" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" required>
+        <div class="mb-3">
+            <label for="rol" class="form-label">Tipo de cuenta</label>
+            <select id="rol" name="rol" class="form-select" required>
                 <option value="cliente">Cliente</option>
                 <option value="dueño">Dueño de negocio</option>
             </select>
-            <x-input-error :messages="$errors->get('rol')" class="mt-2" />
+            @error('rol') <div class="text-danger small">{{ $message }}</div> @enderror
         </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
+        <div class="form-check mb-3">
+    <input type="checkbox" name="acepta_terminos" class="form-check-input" id="acepta_terminos" required>
+    <label class="form-check-label small" for="acepta_terminos">
+        He leído y acepto los <a href="{{ route('terminos') }}" target="_blank">términos y condiciones</a> de ParcheCity.
+    </label>
+</div>
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ route('login') }}" class="small">¿Ya tienes cuenta?</a>
+            <button type="submit" class="btn btn-primary">Registrarse</button>
         </div>
     </form>
 </x-guest-layout>
