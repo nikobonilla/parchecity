@@ -125,12 +125,14 @@ class TipoHabitacionController extends Controller
             'categoria_id' => ['required', Rule::exists('categorias_habitacion', 'id')->where('negocio_id', $negocio->id)],
             'capacidad' => 'nullable|integer|between:1,20',
             'especificaciones' => 'nullable|string|max:500',
-            'precio_hora' => 'nullable|numeric|min:1',
-            'precio_noche' => 'nullable|numeric|min:1',
+            'precio_hora' => 'nullable|numeric|min:1000|max:100000000',
+            'precio_noche' => 'nullable|numeric|min:1000|max:100000000',
             'imagenes.*' => 'nullable|image|max:5120',
         ], [
             'categoria_id.required' => 'Elige una categoría. Si no tienes, créala primero en "Nueva categoría".',
             'categoria_id.exists' => 'La categoría elegida no es válida.',
+            'precio_hora.min' => 'Escribe el precio completo en pesos, por ejemplo 40000 (mínimo 1.000).',
+            'precio_noche.min' => 'Escribe el precio completo en pesos, por ejemplo 150000 (mínimo 1.000).',
         ]);
 
         if (empty($datos['precio_hora']) && empty($datos['precio_noche'])) {
@@ -140,5 +142,24 @@ class TipoHabitacionController extends Controller
         }
 
         return $datos;
+    }
+    public function updateCategoria(Request $request, CategoriaHabitacion $categoria)
+    {
+        abort_unless($categoria->negocio->user_id === auth()->id(), 403);
+
+    $datos = $request->validate([
+        'nombre_categoria' => [
+            'required', 'string', 'max:100',
+            Rule::unique('categorias_habitacion', 'nombre')
+                ->where('negocio_id', $categoria->negocio_id)
+                ->ignore($categoria->id),
+        ],
+    ], [
+        'nombre_categoria.unique' => 'Ya tienes una categoría con ese nombre.',
+    ]);
+
+         $categoria->update(['nombre' => trim(preg_replace('/\s+/', ' ', $datos['nombre_categoria']))]);
+
+         return back()->with('exito', 'Categoría actualizada.');
     }
 }

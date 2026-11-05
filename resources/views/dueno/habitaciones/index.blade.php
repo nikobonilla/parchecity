@@ -24,20 +24,28 @@
             <h5>Categorías</h5>
 
             @if ($categorias->isNotEmpty())
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    @foreach ($categorias as $categoria)
-                        <span class="badge bg-secondary d-inline-flex align-items-center gap-2 fs-6 fw-normal">
-                            {{ $categoria->nombre }} ({{ $categoria->tipos_habitacion_count }})
-                            @if ($categoria->tipos_habitacion_count === 0)
-                                <form method="POST" action="{{ route('dueno.categorias.destroy', $categoria) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta categoría?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm p-0 text-white border-0 bg-transparent" title="Eliminar categoría">×</button>
-                                </form>
-                            @endif
-                        </span>
-                    @endforeach
-                </div>
+            <div class="mb-3">
+                @foreach ($categorias as $categoria)
+                   <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                       <form method="POST" action="{{ route('dueno.categorias.update', $categoria) }}" class="d-flex gap-2 align-items-center">
+                           @csrf
+                           @method('PUT')
+                           <input type="text" name="nombre_categoria" class="form-control form-control-sm" value="{{ $categoria->nombre }}" required>
+                           <button class="btn btn-sm btn-outline-primary text-nowrap">Guardar nombre</button>
+                       </form>
+
+                       <small class="text-muted">{{ $categoria->tipos_habitacion_count }} {{ $categoria->tipos_habitacion_count === 1 ? 'habitación' : 'habitaciones' }}</small>
+
+                       @if ($categoria->tipos_habitacion_count === 0)
+                           <form method="POST" action="{{ route('dueno.categorias.destroy', $categoria) }}" onsubmit="return confirm('¿Eliminar esta categoría?')">
+                               @csrf
+                               @method('DELETE')
+                               <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                           </form>
+                       @endif
+                   </div>
+               @endforeach
+           </div>
             @else
                 <p class="text-muted small">Todavía no tienes categorías. Crea la primera para poder agregar habitaciones.</p>
             @endif
@@ -65,10 +73,10 @@
                             <h5 class="mb-1">{{ $tipo->nombre }}</h5>
                             <div class="mb-1">
                                 @if ($tipo->precio_hora)
-                                    <span class="badge bg-primary">Por hora: ${{ number_format($tipo->precio_hora, 0, ',', '.') }} (de 3 a 12 horas)</span>
+                                    <span class="badge bg-primary">Por hora: @cop($tipo->precio_hora) (de 3 a 12 horas)</span>
                                 @endif
                                 @if ($tipo->precio_noche)
-                                    <span class="badge bg-success">Por noche: ${{ number_format($tipo->precio_noche, 0, ',', '.') }}</span>
+                                    <span class="badge bg-success">Por noche: @cop($tipo->precio_noche)</span>
                                 @endif
                             </div>
                             <small class="text-muted">

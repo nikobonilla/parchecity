@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('contenido')
-    <a href="{{ url()->previous() }}" class="btn btn-link mb-3">&larr; Volver</a>
+    <a href="{{ url()->previous() }}" class="btn btn-link mb-3">&larr; Volver</a>@include('partials.aviso-congelado')
 
     @if (session('exito'))
         <div class="alert alert-success">{{ session('exito') }}</div>
@@ -52,13 +52,13 @@
         </div>
 
         <div class="col-md-5">
-            <h1>{{ $negocio->nombre }}</h1>
+            <h1>{{ $negocio->nombre }} <small class="badge bg-light text-dark border fs-6 align-middle">{{ $negocio->codigo() }}</small></h1>
             <p class="text-muted">{{ ucfirst($negocio->tipo) }} · {{ $negocio->ubicacion }}</p>
             <p>{{ $negocio->descripcion }}</p>
             <p><strong>Dirección:</strong> {{ $negocio->direccion }}</p>
 
             @if ($negocio->hora_apertura && $negocio->hora_cierre)
-                <p><strong>Horario de reservas:</strong> {{ substr($negocio->hora_apertura, 0, 5) }} a {{ substr($negocio->hora_cierre, 0, 5) }}</p>
+                <p><strong>Horario de reservas:</strong> @hora($negocio->hora_apertura) a @hora($negocio->hora_cierre)</p>
             @endif
 
             @if ($negocio->whatsapp)
@@ -68,11 +68,9 @@
                 <p class="small text-muted">El WhatsApp es solo para comunicarte con el negocio por temas administrativos. No sirve para apartar reservas.</p>
             @endif
 
-            @if ($negocio->medio_pago)
-                <div class="alert alert-info">
-                    <strong>Medio de pago:</strong> {{ $negocio->medio_pago }}
-                </div>
-            @endif
+            <div class="alert alert-info">
+                <strong>Pago:</strong> con tarjeta débito o crédito, desde "Mis reservas", después de reservar.
+            </div>
 
             @if ($negocio->tipo === 'restaurante' && $negocio->tarifas->isNotEmpty())
                 <h5 class="mt-3">Tarifas para apartar</h5>
@@ -82,13 +80,14 @@
                             <span>
                                 {{ $tarifa->franja_horaria }}
                                 @if ($tarifa->hora_inicio && $tarifa->hora_fin)
-                                    <small class="text-muted">({{ substr($tarifa->hora_inicio, 0, 5) }} a {{ substr($tarifa->hora_fin, 0, 5) }})</small>
+                                    <small class="text-muted">(@hora($tarifa->hora_inicio) a @hora($tarifa->hora_fin))</small>
                                 @endif
                             </span>
-                            <strong>${{ number_format($tarifa->precio, 0, ',', '.') }}</strong>
+                            <strong>@cop($tarifa->precio)</strong>
                         </li>
                     @endforeach
                 </ul>
+                <p class="small text-muted">La tarifa depende de la franja en la que sea tu hora de entrada. Es un valor fijo: no se suma por horas.</p>
             @endif
         </div>
     </div>
@@ -125,10 +124,10 @@
                                     <h5 class="card-title">{{ $habitacion->nombre }}</h5>
                                     <p class="card-text mb-1">
                                         @if ($habitacion->precio_hora)
-                                            <span class="d-block">Por hora: <strong>${{ number_format($habitacion->precio_hora, 0, ',', '.') }}</strong></span>
+                                            <span class="d-block">Por hora: <strong>@cop($habitacion->precio_hora)</strong></span>
                                         @endif
                                         @if ($habitacion->precio_noche)
-                                            <span class="d-block">Por noche: <strong>${{ number_format($habitacion->precio_noche, 0, ',', '.') }}</strong></span>
+                                            <span class="d-block">Por noche: <strong>@cop($habitacion->precio_noche)</strong></span>
                                         @endif
                                     </p>
                                     <small class="text-muted">
@@ -168,11 +167,13 @@
                 <p class="mb-0">{{ $resena->comentario }}</p>
             @endif
             @auth
-                @if ($resena->user_id === auth()->id())
-                    <form method="POST" action="{{ route('resenas.destroy', $resena) }}" onsubmit="return confirm('¿Eliminar tu reseña?')">
+                @if ($resena->user_id === auth()->id() || auth()->user()->rol === 'administrador')
+                    <form method="POST" action="{{ route('resenas.destroy', $resena) }}" onsubmit="return confirm('¿Eliminar esta reseña?')">
                         @csrf
                         @method('DELETE')
-                        <button class="btn btn-sm btn-link text-danger p-0">Eliminar</button>
+                        <button class="btn btn-sm btn-link text-danger p-0">
+                            {{ $resena->user_id === auth()->id() ? 'Eliminar' : 'Eliminar (administrador)' }}
+                        </button>
                     </form>
                 @endif
             @endauth
@@ -212,7 +213,7 @@
         <h3 class="mb-3">Reservar</h3>
 
         @auth
-            @if ($negocio->estado === 'aprobado')
+            @if ($negocio->estado === 'aprobado' && ! $negocio->congelado)
                 <form method="POST" action="{{ route('reservas.store', $negocio) }}">
                     @csrf
 
@@ -232,19 +233,15 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Fecha</label>
                             <input type="date" name="fecha" class="form-control" value="{{ old('fecha') }}" min="{{ date('Y-m-d') }}" required>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Hora de entrada</label>
                             <input type="time" name="hora_entrada" class="form-control" value="{{ old('hora_entrada') }}" required>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Hora de salida</label>
-                            <input type="time" name="hora_salida" class="form-control" value="{{ old('hora_salida') }}" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Número de personas</label>
                             <select name="personas" class="form-select" required>
                                 <option value="">Selecciona...</option>
@@ -255,12 +252,15 @@
                         </div>
                         <div class="col-md-12 mb-3" id="valorEstimado" style="display:none;">
                             <div class="alert alert-primary mb-0">
-                                Valor estimado según la hora: <strong id="valorEstimadoTexto"></strong>
+                                Valor según la hora: <strong id="valorEstimadoTexto"></strong>
                             </div>
                         </div>
                     </div>
 
-                    <p class="text-muted small">El valor para apartar se calcula automáticamente según la hora de entrada que elijas.</p>
+                    <p class="text-muted small">
+                        La mesa se mantiene {{ $negocio->minutos_liberacion ?? 90 }} minutos desde tu hora de entrada y después se libera sola.
+                        El valor para apartar es fijo según la franja de tu hora de entrada.
+                    </p>
 
                     <div class="mb-3">
                         <label class="form-label">Comentario o petición especial (opcional)</label>
@@ -270,26 +270,30 @@
                     <div class="form-check mb-3">
                         <input type="checkbox" name="acepta_politica" class="form-check-input" id="acepta_politica" required>
                         <label class="form-check-label" for="acepta_politica">
-                            Entiendo que se cobra un porcentaje de la reserva como abono, y que solo es reembolsable dentro de los 30 minutos posteriores a hacerla.
+                            Entiendo que tengo 30 minutos para pagar con tarjeta, y que el pago solo es reembolsable dentro de los {{ \App\Models\Reserva::MINUTOS_REEMBOLSO }} minutos posteriores a hacerlo.
                         </label>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Reservar</button>
                 </form>
             @else
-                <p class="text-muted">Este negocio todavía no está aprobado, por eso no recibe reservas.</p>
+                <p class="text-muted">Este negocio no recibe reservas por ahora (está pendiente de aprobación o congelado).</p>
             @endif
         @else
             <a href="{{ route('login') }}" class="btn btn-primary">Inicia sesión para reservar</a>
         @endauth
 
-        <script>
-            const tarifas = {!! $negocio->tarifas->map(fn ($t) => [
+        @php
+            $tarifasJs = $negocio->tarifas->map(fn ($t) => [
                 'inicio' => $t->hora_inicio,
                 'fin' => $t->hora_fin,
                 'precio' => $t->precio,
                 'nombre' => $t->franja_horaria,
-            ])->values()->toJson() !!};
+            ])->values();
+        @endphp
+
+        <script>
+            const tarifas = @json($tarifasJs);
 
             const inputHora = document.querySelector('input[name="hora_entrada"]');
             const cajaValor = document.getElementById('valorEstimado');

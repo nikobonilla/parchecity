@@ -53,6 +53,12 @@
             <input type="file" name="imagen_home_2" class="form-control" accept="image/*">
         </div>
 
+        <div class="mb-4">
+            <label class="form-label">WhatsApp de atención al cliente (lo ven los dueños)</label>
+            <input type="text" name="whatsapp_soporte" class="form-control" placeholder="573001234567" value="{{ old('whatsapp_soporte', $configuracion->whatsapp_soporte) }}">
+        <div class="form-text">Con el indicativo del país y sin espacios. Ej: 573001234567</div>
+        </div>
+
         <button type="submit" class="btn btn-primary">Guardar configuración</button>
     </form>
 @endsection

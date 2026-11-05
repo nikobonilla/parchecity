@@ -25,12 +25,14 @@ Route::middleware('guest')->group(function () {
         ->name('password.request');
 
     Route::post('forgot-password', [PasswordRecoveryController::class, 'enviarCodigo'])
+        ->middleware('throttle:3,1')
         ->name('password.email');
 
     Route::get('reset-password', [PasswordRecoveryController::class, 'formVerificar'])
         ->name('password.reset');
 
     Route::post('reset-password', [PasswordRecoveryController::class, 'restablecer'])
+        ->middleware('throttle:5,1')
         ->name('password.store');
 });
 

@@ -61,7 +61,7 @@
                         <div class="bg-secondary text-white text-center py-5">Sin imagen</div>
                     @endif
                     <div class="card-body">
-                        <h5 class="card-title">{{ $negocio->nombre }}</h5>
+                        <h5 class="card-title">{{ $negocio->nombre }} @if ($negocio->congelado)<span class="badge bg-warning text-dark">Congelado</span>@endif</h5>
                         <p class="card-text text-muted">{{ ucfirst($negocio->tipo) }} · {{ $negocio->ubicacion }}</p>
                         <p class="card-text">{{ Str::limit($negocio->descripcion, 80) }}</p>
                         <a href="{{ route('negocios.show', $negocio) }}" class="btn btn-outline-primary">Ver más</a>

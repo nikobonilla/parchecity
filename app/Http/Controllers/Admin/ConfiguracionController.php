@@ -12,6 +12,7 @@ class ConfiguracionController extends Controller
     public function edit()
     {
         $configuracion = Configuracion::obtener();
+
         return view('admin.configuracion', compact('configuracion'));
     }
 
@@ -22,6 +23,7 @@ class ConfiguracionController extends Controller
             'imagen_fondo' => 'nullable|image|max:5120',
             'imagen_home_1' => 'nullable|image|max:5120',
             'imagen_home_2' => 'nullable|image|max:5120',
+            'whatsapp_soporte' => 'nullable|string|max:25',
         ]);
 
         $configuracion = Configuracion::obtener();
@@ -34,6 +36,8 @@ class ConfiguracionController extends Controller
                 $configuracion->$campo = $request->file($campo)->store('configuracion', 'public');
             }
         }
+
+        $configuracion->whatsapp_soporte = $request->filled('whatsapp_soporte') ? $request->whatsapp_soporte : null;
 
         $configuracion->save();
 

@@ -30,9 +30,14 @@ class ResenaController extends Controller
         return back()->with('exito', '¡Gracias por tu reseña!');
     }
 
+    // La puede borrar quien la escribió o el administrador. El dueño del negocio no.
     public function destroy(Resena $resena)
     {
-        abort_unless($resena->user_id === auth()->id(), 403);
+        $esAutor = $resena->user_id === auth()->id();
+        $esAdmin = auth()->user()->rol === 'administrador';
+
+        abort_unless($esAutor || $esAdmin, 403);
+
         $resena->delete();
 
         return back()->with('exito', 'Reseña eliminada.');

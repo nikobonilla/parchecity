@@ -22,7 +22,8 @@ class CupoHabitacionController extends Controller
         $cupo = $tipoHabitacion->cupos()->where('fecha', $fecha)->first();
 
         $reservadas = $tipoHabitacion->reservas()
-            ->where('fecha', $fecha)
+            ->where('fecha', '<=', $fecha)
+            ->where('fecha_salida', '>=', $fecha)
             ->whereIn('estado', ['pendiente', 'confirmada'])
             ->count();
 

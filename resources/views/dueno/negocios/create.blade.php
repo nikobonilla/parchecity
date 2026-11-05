@@ -56,9 +56,6 @@
                 <input type="time" name="hora_cierre" class="form-control">
             </div>
         </div>
-        <div class="mb-3">
-    <label class="form-label">Medio de pago (ej: Nequi 3001234567, o cuenta bancaria)</label>
-    <input type="text" name="medio_pago" class="form-control" value="{{ old('medio_pago', $negocio->medio_pago ?? '') }}">
 </div>
 
         <div class="mb-3">

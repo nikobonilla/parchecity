@@ -36,7 +36,7 @@ class NegocioController extends Controller
             'hora_apertura' => 'nullable|date_format:H:i',
             'hora_cierre' => 'nullable|date_format:H:i',
             'medio_pago' => 'nullable|string|max:255',
-            'imagenes.*' => 'nullable|image|max:2048',
+            'imagenes.*' => 'nullable|image|max:5120',
         ]);
 
         $imagenes = $request->file('imagenes', []);
@@ -69,7 +69,7 @@ class NegocioController extends Controller
             'hora_cierre' => 'nullable|date_format:H:i,H:i:s',
             'minutos_liberacion' => 'required|integer|min:10|max:1440',
             'medio_pago' => 'nullable|string|max:255',
-            'imagenes.*' => 'nullable|image|max:2048',
+            'imagenes.*' => 'nullable|image|max:5120',
         ]);
 
         $imagenes = $request->file('imagenes', []);

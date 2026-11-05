@@ -6,7 +6,7 @@
         @if ($negocio->tipo === 'restaurante')
             <a href="{{ route('dueno.cupos.index', $negocio) }}" class="btn btn-outline-primary">Disponibilidad por fecha</a>
         @else
-            <a href="{{ route('dueno.habitaciones.index', $negocio) }}" class="btn btn-outline-primary">Tipos de habitación</a>
+            <a href="{{ route('dueno.habitaciones.index', $negocio) }}" class="btn btn-outline-primary">Habitaciones</a>
         @endif
     </div>
 
@@ -83,11 +83,6 @@
             <input type="text" name="whatsapp" class="form-control" value="{{ old('whatsapp', $negocio->whatsapp) }}">
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Medio de pago (ej: Nequi 3001234567, o cuenta bancaria)</label>
-            <input type="text" name="medio_pago" class="form-control" value="{{ old('medio_pago', $negocio->medio_pago) }}">
-        </div>
-
         <div class="row mb-3">
             <div class="col-md-4">
                 <label class="form-label">Hora de apertura</label>
@@ -98,8 +93,19 @@
                 <input type="time" name="hora_cierre" class="form-control" value="{{ old('hora_cierre', $negocio->hora_cierre ? substr($negocio->hora_cierre, 0, 5) : '') }}">
             </div>
             <div class="col-md-4">
-                <label class="form-label">Minutos para liberar {{ $negocio->tipo === 'restaurante' ? 'la mesa' : 'la habitación' }} de una reserva</label>
+                @if ($negocio->tipo === 'restaurante')
+                    <label class="form-label">Tiempo que se ocupa una mesa (minutos)</label>
+                @else
+                    <label class="form-label">Margen de limpieza entre huéspedes (minutos)</label>
+                @endif
                 <input type="number" name="minutos_liberacion" class="form-control" min="10" max="1440" value="{{ old('minutos_liberacion', $negocio->minutos_liberacion ?? 90) }}" required>
+                <div class="form-text">
+                    @if ($negocio->tipo === 'restaurante')
+                        Ej: 90 o 120. Pasado ese tiempo desde la hora de entrada, la mesa se libera sola.
+                    @else
+                        Ej: 40. Cada habitación debe quedar libre este tiempo antes de la siguiente entrada para poder prepararla.
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -115,9 +121,9 @@
         <hr class="my-4">
 
         <h3>Tarifas por horario</h3>
-        <p class="text-muted">El sistema aplica automáticamente la tarifa que corresponde a la hora de entrada de cada reserva. Ese valor es el que se paga para apartar.</p>
+        <p class="text-muted">El sistema aplica automáticamente la tarifa que corresponde a la hora de entrada de cada reserva. Es un valor fijo para esa franja: no se suma por horas.</p>
 
-        <table class="table">
+        <table class="table align-middle">
             <thead>
                 <tr>
                     <th>Nombre</th>
@@ -131,14 +137,38 @@
                 @forelse ($negocio->tarifas->sortBy('hora_inicio') as $tarifa)
                     <tr>
                         <td>{{ $tarifa->franja_horaria }}</td>
-                        <td>{{ $tarifa->hora_inicio ? substr($tarifa->hora_inicio, 0, 5) : '-' }}</td>
-                        <td>{{ $tarifa->hora_fin ? substr($tarifa->hora_fin, 0, 5) : '-' }}</td>
-                        <td>${{ number_format($tarifa->precio, 0, ',', '.') }}</td>
-                        <td>
-                            <form method="POST" action="{{ route('dueno.tarifas.destroy', $tarifa) }}" onsubmit="return confirm('¿Eliminar esta tarifa?')">
+                        <td>@hora($tarifa->hora_inicio)</td>
+                        <td>@hora($tarifa->hora_fin)</td>
+                        <td>@cop($tarifa->precio)</td>
+                        <td class="text-nowrap">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#editarTarifa{{ $tarifa->id }}">Editar</button>
+                            <form method="POST" action="{{ route('dueno.tarifas.destroy', $tarifa) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta tarifa?')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr class="collapse" id="editarTarifa{{ $tarifa->id }}">
+                        <td colspan="5" class="bg-light">
+                            <form method="POST" action="{{ route('dueno.tarifas.update', $tarifa) }}" class="row g-2">
+                                @csrf
+                                @method('PUT')
+                                <div class="col-md-3">
+                                    <input type="text" name="franja_horaria" class="form-control form-control-sm" value="{{ $tarifa->franja_horaria }}" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="time" name="hora_inicio" class="form-control form-control-sm" value="{{ substr($tarifa->hora_inicio, 0, 5) }}" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="time" name="hora_fin" class="form-control form-control-sm" value="{{ substr($tarifa->hora_fin, 0, 5) }}" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="number" name="precio" class="form-control form-control-sm" min="1000" value="{{ (int) $tarifa->precio }}" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100">Guardar</button>
+                                </div>
                             </form>
                         </td>
                     </tr>
@@ -148,6 +178,7 @@
             </tbody>
         </table>
 
+        <h6>Agregar tarifa</h6>
         <form method="POST" action="{{ route('dueno.tarifas.store', $negocio) }}" class="row g-2">
             @csrf
             <div class="col-md-3">
@@ -160,7 +191,7 @@
                 <input type="time" name="hora_fin" class="form-control" value="{{ old('hora_fin') }}" required>
             </div>
             <div class="col-md-3">
-                <input type="number" name="precio" class="form-control" placeholder="Valor" min="0" value="{{ old('precio') }}" required>
+                <input type="number" name="precio" class="form-control" placeholder="Valor en pesos (ej: 20000)" min="1000" value="{{ old('precio') }}" required>
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">Agregar</button>
