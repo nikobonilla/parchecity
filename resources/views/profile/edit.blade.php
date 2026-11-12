@@ -60,6 +60,7 @@
                         <div class="mb-3">
                             <label class="form-label">Nueva contraseña</label>
                             <input type="password" name="password" class="form-control">
+                            <div class="form-text">Mínimo 12 caracteres, con mayúscula, minúscula, número y símbolo.</div>
                             @error('password', 'updatePassword') <div class="text-danger small">{{ $message }}</div> @enderror
                         </div>
 

@@ -15,9 +15,9 @@
             <label class="form-label">Tipo</label>
             <select name="tipo" class="form-select" required>
                 <option value="">Selecciona...</option>
-                <option value="restaurante">Restaurante</option>
-                <option value="hotel">Hotel</option>
-                <option value="motel">Motel</option>
+                <option value="restaurante" @selected(old('tipo') === 'restaurante')>Restaurante</option>
+                <option value="hotel" @selected(old('tipo') === 'hotel')>Hotel</option>
+                <option value="motel" @selected(old('tipo') === 'motel')>Motel</option>
             </select>
         </div>
 
@@ -26,10 +26,7 @@
             <input type="text" name="direccion" class="form-control" value="{{ old('direccion') }}" required>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Ubicación / Ciudad</label>
-            <input type="text" name="ubicacion" class="form-control" value="{{ old('ubicacion') }}">
-        </div>
+        @include('partials.selector-ubicacion', ['negocio' => null])
 
         <div class="mb-3">
             <label class="form-label">Descripción</label>
@@ -49,14 +46,14 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label class="form-label">Hora de apertura</label>
-                <input type="time" name="hora_apertura" class="form-control">
+                <input type="time" name="hora_apertura" class="form-control" value="{{ old('hora_apertura') }}">
             </div>
             <div class="col-md-6">
                 <label class="form-label">Hora de cierre</label>
-                <input type="time" name="hora_cierre" class="form-control">
+                <input type="time" name="hora_cierre" class="form-control" value="{{ old('hora_cierre') }}">
+                <div class="form-text">Las reservas dejan de recibirse 3 horas antes del cierre.</div>
             </div>
         </div>
-</div>
 
         <div class="mb-3">
             <label class="form-label">Imágenes</label>

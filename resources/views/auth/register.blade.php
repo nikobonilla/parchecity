@@ -17,6 +17,7 @@
         <div class="mb-3">
             <label for="password" class="form-label">Contraseña</label>
             <input id="password" type="password" name="password" class="form-control" required>
+            <div class="form-text">Mínimo 12 caracteres, con mayúscula, minúscula, número y símbolo.</div>
             @error('password') <div class="text-danger small">{{ $message }}</div> @enderror
         </div>
 

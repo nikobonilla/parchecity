@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('contenido')
-    <a href="{{ url()->previous() }}" class="btn btn-link mb-3">&larr; Volver</a>@include('partials.aviso-congelado')
+    <a href="{{ url()->previous() }}" class="btn btn-link mb-3">&larr; Volver</a>@include('partials.aviso-congelado')@include('partials.estado-atencion')
 
     @if (session('exito'))
         <div class="alert alert-success">{{ session('exito') }}</div>
@@ -54,8 +54,9 @@
         <div class="col-md-5">
             <h1>{{ $negocio->nombre }} <small class="badge bg-light text-dark border fs-6 align-middle">{{ $negocio->codigo() }}</small></h1>
             <p class="text-muted">{{ ucfirst($negocio->tipo) }} · {{ $negocio->ubicacion }}</p>
+            <p>@include('partials.boton-favorito')</p>
             <p>{{ $negocio->descripcion }}</p>
-            <p><strong>Dirección:</strong> {{ $negocio->direccion }}</p>
+            <p><strong>Dirección:</strong> {{ $negocio->direccion }}@if ($negocio->barrio) · Barrio {{ $negocio->barrio }}@endif @if ($negocio->localidad) · {{ $negocio->localidad->nombre }}@endif @if ($negocio->indicaciones)<br><small class="text-muted">{{ $negocio->indicaciones }}</small>@endif</p>
 
             @if ($negocio->hora_apertura && $negocio->hora_cierre)
                 <p><strong>Horario de reservas:</strong> @hora($negocio->hora_apertura) a @hora($negocio->hora_cierre)</p>
@@ -92,7 +93,7 @@
         </div>
     </div>
 
-    @if ($negocio->tipo !== 'restaurante')
+    @include('partials.menu-restaurante') @if ($negocio->tipo !== 'restaurante')
         <hr class="my-4">
 
         <div id="habitaciones">

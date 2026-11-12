@@ -1,7 +1,10 @@
 @extends('layouts.main')
 
 @section('contenido')
-    <h1 class="mb-4">Panel de administración</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Panel de administración</h1>
+        <a href="{{ route('admin.estadisticas') }}" class="btn btn-primary">Ver estadísticas</a>
+    </div>
 
     <div class="row">
         <div class="col-md-4 mb-3">

@@ -16,7 +16,7 @@ class DashboardAdminController extends Controller
             'aprobados' => Negocio::where('estado', 'aprobado')->count(),
             'congelados' => Negocio::where('congelado', true)->count(),
             'totalUsuarios' => User::count(),
-            'mensajesNuevos' => BuzonMensaje::where('estado', 'nuevo')->count(),
+            'mensajesNuevos' => BuzonMensaje::whereNull('archivado_at')->where('estado', 'nuevo')->count(),
         ]);
     }
 }

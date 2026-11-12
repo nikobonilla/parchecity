@@ -42,4 +42,8 @@ class User extends Authenticatable
 {
     return $this->hasMany(Tarjeta::class);
 }
+public function favoritos()
+{
+    return $this->belongsToMany(Negocio::class, 'favoritos')->withTimestamps();
+}
 }

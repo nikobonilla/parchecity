@@ -23,6 +23,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\BuzonAdminController;
 use App\Http\Controllers\BuzonController;
 use App\Http\Controllers\NegocioEstadoController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\UbicacionController;
+use App\Http\Controllers\FavoritoController;
+use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\Admin\EstadisticasAdminController;
+use App\Http\Controllers\EstadisticasDuenoController;
 
 /* ===== Públicas ===== */
 Route::get('/', [NegocioPublicoController::class, 'index'])->name('home');
@@ -32,6 +38,8 @@ Route::get('/moteles', [NegocioPublicoController::class, 'moteles'])->name('mote
 Route::get('/negocios/{negocio}', [NegocioPublicoController::class, 'show'])->name('negocios.show');
 Route::get('/negocios/{negocio}/habitaciones/{tipoHabitacion}', [NegocioPublicoController::class, 'habitacion'])->name('habitaciones.show');
 Route::view('/terminos', 'terminos')->name('terminos');
+Route::get('/ubicaciones/municipios/{departamento}', [UbicacionController::class, 'municipios'])->where('departamento', '[0-9]{2}')->name('ubicaciones.municipios');
+Route::get('/ubicaciones/localidades/{municipio}', [UbicacionController::class, 'localidades'])->where('municipio', '[0-9]{5}')->name('ubicaciones.localidades');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -42,6 +50,9 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/buzon', [BuzonController::class, 'crear'])->name('buzon.crear');
     Route::post('/buzon', [BuzonController::class, 'store'])->middleware('throttle:5,1')->name('buzon.store');
+    Route::get('/buzon/historial', [BuzonController::class, 'historial'])->name('buzon.historial');
+    Route::post('/buzon/{mensaje}/eliminar', [BuzonController::class, 'eliminar'])->name('buzon.eliminar');
+    Route::post('/buzon/{mensaje}/restaurar', [BuzonController::class, 'restaurar'])->name('buzon.restaurar');
 
     Route::post('/negocios/{negocio}/reservar', [ReservaController::class, 'store'])->name('reservas.store');
     Route::post('/negocios/{negocio}/habitaciones/{tipoHabitacion}/reservar', [ReservaHabitacionController::class, 'store'])->name('habitaciones.reservar');
@@ -62,6 +73,18 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 
     Route::post('/negocios/{negocio}/resenas', [ResenaController::class, 'store'])->name('resenas.store');
     Route::delete('/resenas/{resena}', [ResenaController::class, 'destroy'])->name('resenas.destroy');
+
+    Route::get('/buzon/mis-solicitudes', [BuzonController::class, 'mis'])->name('buzon.mis');
+
+    Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
+    Route::get('/notificaciones/{id}/abrir', [NotificacionController::class, 'abrir'])->name('notificaciones.abrir');
+    Route::post('/notificaciones/leer-todas', [NotificacionController::class, 'leerTodas'])->name('notificaciones.leerTodas');
+    Route::delete('/notificaciones/limpiar', [NotificacionController::class, 'limpiar'])->name('notificaciones.limpiar');
+    Route::delete('/notificaciones/{id}', [NotificacionController::class, 'destroy'])->name('notificaciones.destroy');
+
+    Route::get('/favoritos', [FavoritoController::class, 'index'])->name('favoritos.index');
+    Route::post('/favoritos/{negocio}', [FavoritoController::class, 'store'])->name('favoritos.store');
+    Route::delete('/favoritos/{negocio}', [FavoritoController::class, 'destroy'])->name('favoritos.destroy');
 });
 
 /* ===== Dueño ===== */
@@ -77,6 +100,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
     Route::post('/panel-dueno/negocios/{negocio}/congelar', [NegocioEstadoController::class, 'congelar'])->name('dueno.negocios.congelar');
     Route::post('/panel-dueno/negocios/{negocio}/descongelar', [NegocioEstadoController::class, 'descongelar'])->name('dueno.negocios.descongelar');
     Route::delete('/panel-dueno/negocios/{negocio}', [NegocioEstadoController::class, 'destroy'])->name('dueno.negocios.destroy');
+    Route::post('/panel-dueno/negocios/{negocio}/menus', [MenuController::class, 'store'])->name('dueno.menus.store');
+    Route::put('/panel-dueno/menus/{menu}', [MenuController::class, 'update'])->name('dueno.menus.update');
+    Route::delete('/panel-dueno/menus/{menu}', [MenuController::class, 'destroy'])->name('dueno.menus.destroy');
+    Route::get('/panel-dueno/estadisticas', [EstadisticasDuenoController::class, 'index'])->name('dueno.estadisticas');
 
     // Restaurantes
     Route::post('/panel-dueno/negocios/{negocio}/tarifas', [TarifaController::class, 'store'])->name('dueno.tarifas.store');
@@ -104,7 +131,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 });
 
 /* ===== Administrador ===== */
-Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/', [DashboardAdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/negocios/pendientes', [NegocioAdminController::class, 'pendientes'])->name('admin.negocios.pendientes');
     Route::get('/negocios', [NegocioAdminController::class, 'index'])->name('admin.negocios.index');
@@ -115,17 +142,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('/negocios/{negocio}/congelar', [NegocioAdminController::class, 'congelar'])->name('admin.negocios.congelar');
     Route::post('/negocios/{negocio}/descongelar', [NegocioAdminController::class, 'descongelar'])->name('admin.negocios.descongelar');
     Route::delete('/negocios/{negocio}', [NegocioAdminController::class, 'destroy'])->name('admin.negocios.destroy');
-
     Route::get('/buzon', [BuzonAdminController::class, 'index'])->name('admin.buzon.index');
     Route::put('/buzon/{mensaje}/estado', [BuzonAdminController::class, 'estado'])->name('admin.buzon.estado');
     Route::delete('/buzon/{mensaje}', [BuzonAdminController::class, 'destroy'])->name('admin.buzon.destroy');   
-
     Route::get('/configuracion', [ConfiguracionController::class, 'edit'])->name('admin.configuracion.edit');
     Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('admin.configuracion.update');
-
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('admin.usuarios.index');
     Route::put('/usuarios/{usuario}/rol', [UsuarioController::class, 'actualizarRol'])->name('admin.usuarios.rol');
     Route::delete('/usuarios/{usuario}', [UsuarioController::class, 'destroy'])->name('admin.usuarios.destroy');
+    Route::get('/negocios/eliminados', [NegocioAdminController::class, 'eliminados'])->name('admin.negocios.eliminados');
+    Route::post('/negocios/{id}/restaurar', [NegocioAdminController::class, 'restaurar'])->name('admin.negocios.restaurar');
+    Route::get('/buzon/historial', [BuzonAdminController::class, 'historial'])->name('admin.buzon.historial');
+    Route::put('/buzon/{mensaje}/responder', [BuzonAdminController::class, 'responder'])->name('admin.buzon.responder');
+    Route::post('/buzon/{mensaje}/restaurar', [BuzonAdminController::class, 'restaurar'])->name('admin.buzon.restaurar');
+    Route::get('/estadisticas', [EstadisticasAdminController::class, 'index'])->name('admin.estadisticas');
 });
 
 require __DIR__.'/auth.php';

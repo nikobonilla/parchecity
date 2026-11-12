@@ -63,10 +63,7 @@
             <input type="text" name="direccion" class="form-control" value="{{ old('direccion', $negocio->direccion) }}" required>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Ubicación / Ciudad</label>
-            <input type="text" name="ubicacion" class="form-control" value="{{ old('ubicacion', $negocio->ubicacion) }}">
-        </div>
+        @include('partials.selector-ubicacion', ['negocio' => $negocio])
 
         <div class="mb-3">
             <label class="form-label">Descripción</label>
@@ -91,6 +88,7 @@
             <div class="col-md-4">
                 <label class="form-label">Hora de cierre</label>
                 <input type="time" name="hora_cierre" class="form-control" value="{{ old('hora_cierre', $negocio->hora_cierre ? substr($negocio->hora_cierre, 0, 5) : '') }}">
+                <div class="form-text">Las reservas dejan de recibirse 3 horas antes del cierre.</div>
             </div>
             <div class="col-md-4">
                 @if ($negocio->tipo === 'restaurante')
@@ -198,4 +196,55 @@
             </div>
         </form>
     @endif
+    @if ($negocio->tipo === 'restaurante')
+    <hr class="my-4">
+
+    <h3>Menú</h3>
+    <p class="text-muted">Sube fotos de tu carta o un PDF. Los clientes lo ven en la página de tu restaurante y lo pueden descargar.</p>
+
+    @if ($negocio->menus->isNotEmpty())
+        <div class="row g-3 mb-4">
+            @foreach ($negocio->menus as $menu)
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        @if ($menu->tipo === 'imagen')
+                            <img src="{{ asset('storage/' . $menu->ruta) }}" class="card-img-top" style="height: 160px; object-fit: cover;">
+                        @else
+                            <div class="card-body text-center py-4"><div class="display-6">PDF</div></div>
+                        @endif
+                        <div class="card-body">
+                            <form method="POST" action="{{ route('dueno.menus.update', $menu) }}" class="d-flex gap-2 mb-2">
+                                @csrf
+                                @method('PUT')
+                                <input type="text" name="titulo" class="form-control form-control-sm" value="{{ $menu->titulo }}" placeholder="Título (ej: Carta de platos)">
+                                <button class="btn btn-sm btn-outline-primary">Guardar</button>
+                            </form>
+                            <a href="{{ asset('storage/' . $menu->ruta) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Ver</a>
+                            <form method="POST" action="{{ route('dueno.menus.destroy', $menu) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este archivo del menú?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
+    <h6>Subir menú</h6>
+    <form method="POST" action="{{ route('dueno.menus.store', $negocio) }}" enctype="multipart/form-data" class="row g-2">
+        @csrf
+        <div class="col-md-4">
+            <input type="text" name="titulo" class="form-control" placeholder="Título (opcional)">
+        </div>
+        <div class="col-md-5">
+            <input type="file" name="archivos[]" class="form-control" multiple accept="image/*,application/pdf" required>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">Subir</button>
+        </div>
+    </form>
+    <div class="form-text">Fotos (JPG, PNG, WEBP) o PDF, hasta 10 MB cada uno.</div>
+@endif
 @endsection

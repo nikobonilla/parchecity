@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('contenido')
-    <a href="{{ route('negocios.show', $negocio) }}#habitaciones" class="btn btn-link mb-3">&larr; Volver a {{ $negocio->nombre }}</a>@include('partials.aviso-congelado')
+    <a href="{{ route('negocios.show', $negocio) }}#habitaciones" class="btn btn-link mb-3">&larr; Volver a {{ $negocio->nombre }}</a>@include('partials.aviso-congelado')@include('partials.estado-atencion')
 
     @if (session('exito'))
         <div class="alert alert-success">{{ session('exito') }}</div>
@@ -78,7 +78,7 @@
                 </li>
             </ul>
 
-            <p><strong>Dirección:</strong> {{ $negocio->direccion }}</p>
+            <p><strong>Dirección:</strong> {{ $negocio->direccion }}@if ($negocio->barrio) · Barrio {{ $negocio->barrio }}@endif @if ($negocio->localidad) · {{ $negocio->localidad->nombre }}@endif @if ($negocio->indicaciones)<br><small class="text-muted">{{ $negocio->indicaciones }}</small>@endif</p>
 
             @if ($negocio->whatsapp)
                 <a href="https://wa.me/{{ preg_replace('/\D/', '', $negocio->whatsapp) }}" target="_blank" class="btn btn-success mb-2">

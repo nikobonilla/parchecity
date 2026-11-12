@@ -81,36 +81,37 @@ class ReservaService
         });
     }
 
-   private function validarHorario(array $datos, Negocio $negocio): void
-{
-    $this->validarHorarioNegocio($negocio, $datos['hora_entrada']);
+    private function validarHorario(array $datos, Negocio $negocio): void
+    {
+        $this->validarHorarioNegocio($negocio, $datos['hora_entrada']);
 
-    $entrada = $this->aMinutos($datos['hora_entrada']);
+        $entrada = $this->aMinutos($datos['hora_entrada']);
 
-    if ($datos['fecha'] === now()->toDateString() && $entrada <= (now()->hour * 60 + now()->minute)) {
-        $this->fallar('hora_entrada', 'Esa hora ya pasó. Elige una hora posterior.');
-    }
-}
-
-// La hora de entrada debe estar dentro del horario de atención (también si atiende de noche, ej. 4:00 p. m. a 1:00 a. m.)
-private function validarHorarioNegocio(Negocio $negocio, string $hora): void
-{
-    if (! $negocio->hora_apertura || ! $negocio->hora_cierre) {
-        return;
+        if ($datos['fecha'] === now()->toDateString() && $entrada <= (now()->hour * 60 + now()->minute)) {
+            $this->fallar('hora_entrada', 'Esa hora ya pasó. Elige una hora posterior.');
+        }
     }
 
-    $t = $this->aMinutos($hora);
-    $abre = $this->aMinutos($negocio->hora_apertura);
-    $cierra = $this->aMinutos($negocio->hora_cierre);
-
-    $dentro = $abre <= $cierra
-        ? ($t >= $abre && $t <= $cierra)
-        : ($t >= $abre || $t <= $cierra);
-
-    if (! $dentro) {
-        $this->fallar('hora_entrada', 'El negocio atiende de ' . Formato::hora($negocio->hora_apertura) . ' a ' . Formato::hora($negocio->hora_cierre) . '. Elige una hora de entrada dentro de ese horario.');
+    // Regla de las 3 horas en el servicio de reservas
+    private function validarHorarioNegocio(Negocio $negocio, string $hora): void
+    {
+        $ventana = $negocio->ventanaDeReservas();
+        if (! $ventana) {
+            return; // sin horario: atiende 24 horas
+        }
+        $horas = Negocio::HORAS_ANTES_DEL_CIERRE;
+        if ($ventana['ultima_entrada'] < $ventana['abre']) {
+            $this->fallar('hora_entrada', "Este negocio no recibe reservas con su horario actual (las reservas se cierran {$horas} horas antes del cierre).");
+        }
+        if (! $negocio->aceptaEntradaA($hora)) {
+            $this->fallar(
+                'hora_entrada',
+                'El negocio atiende de ' . Formato::hora($negocio->hora_apertura) . ' a ' . Formato::hora($negocio->hora_cierre)
+                . ' y recibe reservas hasta las ' . Formato::hora($negocio->ultimaEntrada())
+                . " ({$horas} horas antes del cierre). Elige una hora de entrada dentro de ese rango."
+            );
+        }
     }
-}
 
     /* ============ HOTELES Y MOTELES ============ */
 
@@ -226,29 +227,9 @@ private function validarHorarioNegocio(Negocio $negocio, string $hora): void
 
     /* ============ LÓGICA COMPARTIDA ============ */
 
-    // Cuánto tiempo deja ocupada una reserva (y su margen de limpieza si es habitación)
     private function intervalo(Reserva $r, Negocio $negocio): array
     {
-        $desde = Carbon::parse($r->fecha . ' ' . $r->hora_entrada);
-        $margen = (int) ($negocio->minutos_liberacion ?? 90);
-
-        if ($r->tipo_habitacion_id) {
-            $cantidad = max(1, (int) $r->cantidad);
-            $fin = $r->modalidad === 'horas'
-                ? $desde->copy()->addHours($cantidad)
-                : $desde->copy()->addDays($cantidad);
-            $extra = $margen;
-        } else {
-            $fin = $desde->copy()->addMinutes($margen);
-            $extra = 0;
-        }
-
-        // Si el dueño la liberó a mano, deja de ocupar desde ese momento
-        if ($r->liberada_at && $r->liberada_at->lt($fin)) {
-            $fin = $r->liberada_at->gt($desde) ? $r->liberada_at->copy() : $desde->copy();
-        }
-
-        return ['desde' => $desde, 'hasta' => $fin->copy()->addMinutes($extra)];
+        return $r->intervaloOcupado($negocio);
     }
 
     // ¿En algún momento del intervalo nuevo se pasaría el número de mesas o habitaciones?

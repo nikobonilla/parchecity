@@ -3,7 +3,7 @@
 @section('contenido')
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <h1 class="mb-1">Buzón de sugerencias</h1>
+            <h1 class="mb-1">Buzón de sugerencias</h1><p><a href="{{ route('buzon.mis') }}">Ver mis solicitudes anteriores y sus respuestas</a></p>
             <p class="text-muted">
                 Cuéntanos una recomendación, una mejora o una queja. Solo la ve la administración y nos ayuda a tomar mejores decisiones para cada negocio.
             </p>

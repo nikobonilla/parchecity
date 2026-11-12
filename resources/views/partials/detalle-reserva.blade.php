@@ -7,10 +7,5 @@
         @hora($reserva->hora_salida)</small>
 @else
     {{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}<br>
-    <small>Entrada
-        @hora($reserva->hora_entrada)
-        @if ($reserva->hora_salida)
-            · mesa hasta ~@hora($reserva->hora_salida)
-        @endif
-    </small>
+    <small>Entrada @hora($reserva->hora_entrada)</small>
 @endif

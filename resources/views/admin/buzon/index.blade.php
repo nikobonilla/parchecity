@@ -1,8 +1,7 @@
 @extends('layouts.main')
 
 @section('contenido')
-    <h1 class="mb-3">Buzón</h1>
-
+    <div class="d-flex justify-content-between align-items-center mb-3"><h1 class="mb-0">Buzón</h1><a href="{{ route('admin.buzon.historial') }}" class="btn btn-outline-secondary">Ver historial completo</a></div>
     @if (session('exito'))
         <div class="alert alert-success">{{ session('exito') }}</div>
     @endif
@@ -88,7 +87,7 @@
                                 </div>
                             @endif
 
-                            <p class="mb-3" style="white-space: pre-line;">{{ $m->mensaje }}</p>
+                            <p class="mb-3" style="white-space: pre-line;">{{ $m->mensaje }}</p>@include('partials.buzon-respuesta')
 
                             <div class="d-flex gap-2 flex-wrap">
                                 @if ($m->estado !== 'leido')
@@ -107,10 +106,10 @@
                                         <button class="btn btn-sm btn-outline-success">Marcar resuelto</button>
                                     </form>
                                 @endif
-                                <form method="POST" action="{{ route('admin.buzon.destroy', $m) }}" onsubmit="return confirm('¿Eliminar este mensaje?')">
+                                <form method="POST" action="{{ route('admin.buzon.destroy', $m) }}" onsubmit="return confirm('¿Quitar este mensaje del buzón? Seguirá en el historial.')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                   <button class="btn btn-sm btn-outline-danger">Quitar del buzón</button>
                                 </form>
                             </div>
                         </div>

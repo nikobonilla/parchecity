@@ -40,10 +40,9 @@
                 <label class="form-label">Dirección</label>
                 <input type="text" name="direccion" class="form-control" value="{{ old('direccion', $negocio->direccion) }}" required>
             </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Ubicación / Ciudad</label>
-                <input type="text" name="ubicacion" class="form-control" value="{{ old('ubicacion', $negocio->ubicacion) }}">
-            </div>
+            <div class="col-12">
+              @include('partials.selector-ubicacion', ['negocio' => $negocio])
+        </div>
         </div>
 
         <div class="mb-3">

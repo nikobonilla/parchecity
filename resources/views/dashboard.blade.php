@@ -14,11 +14,14 @@
         <a href="{{ route('cliente.reservas.index') }}" class="btn btn-primary">Mis reservas</a>
         <a href="{{ route('cliente.reservas.historial') }}" class="btn btn-outline-primary">Historial</a>
         <a href="{{ route('cliente.tarjetas.index') }}" class="btn btn-outline-primary">Mis tarjetas</a>
-        <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary">Mi perfil</a><a href="{{ route('buzon.crear') }}" class="btn btn-outline-secondary">Buzón de sugerencias</a>
+        <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary">Mi perfil</a>
+        <a href="{{ route('buzon.crear') }}" class="btn btn-outline-secondary">Buzón de sugerencias</a>
 
         @if ($usuario->rol === 'dueño')
             <a href="{{ route('dueno.negocios.index') }}" class="btn btn-success">Mis negocios</a>
-            <a href="{{ route('dueno.reservas.index') }}" class="btn btn-outline-success">Reservas recibidas</a>@include('partials.boton-soporte')
+            <a href="{{ route('dueno.reservas.index') }}" class="btn btn-outline-success">Reservas recibidas</a>
+            <a href="{{ route('dueno.estadisticas') }}" class="btn btn-outline-success">Estadísticas</a>
+            @include('partials.boton-soporte')
         @endif
     </div>
 

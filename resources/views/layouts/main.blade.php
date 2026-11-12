@@ -30,11 +30,15 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('moteles') }}">Moteles</a></li>
 
                     @auth
-                        <li class="nav-item"><a class="nav-link" href="{{ route('cliente.reservas.index') }}">Mis reservas</a></li>
+                        @if (auth()->user()->rol !== 'administrador')
+                            <li class="nav-item"><a class="nav-link" href="{{ route('cliente.reservas.index') }}">Mis reservas</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('favoritos.index') }}">♥ Favoritos</a></li>
+                        @endif
 
                         @if (auth()->user()->rol === 'dueño')
                             <li class="nav-item"><a class="nav-link" href="{{ route('dueno.negocios.index') }}">Mis negocios</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('dueno.reservas.index') }}">Reservas recibidas</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('dueno.estadisticas') }}">Estadísticas</a></li>
                         @endif
 
                         @if (auth()->user()->rol === 'administrador')
@@ -42,17 +46,52 @@
                             <li class="nav-item"><a class="nav-link" href="{{ route('admin.negocios.pendientes') }}">Pendientes</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('admin.negocios.index') }}">Todos los negocios</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('admin.buzon.index') }}">Buzón</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('admin.estadisticas') }}">Estadísticas</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('admin.usuarios.index') }}">Usuarios</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('admin.configuracion.edit') }}">Configuración</a></li>
                         @endif
                     @endauth
                 </ul>
 
-                <ul class="navbar-nav">
+                <ul class="navbar-nav align-items-lg-center">
                     @guest
                         <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Iniciar sesión</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Registrarse</a></li>
                     @else
+                        @php
+                            $noLeidas = auth()->user()->unreadNotifications()->count();
+                            $ultimas = auth()->user()->notifications()->limit(6)->get();
+                            $coloresAviso = ['info' => 'primary', 'success' => 'success', 'warning' => 'warning', 'danger' => 'danger'];
+                        @endphp
+
+                        <li class="nav-item dropdown me-lg-2">
+                            <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" title="Notificaciones">
+                                🔔
+                                @if ($noLeidas > 0)
+                                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">{{ $noLeidas > 99 ? '99+' : $noLeidas }}</span>
+                                @endif
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end p-0" style="width: 340px;">
+                                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                                    <strong>Notificaciones</strong>
+                                    <a href="{{ route('notificaciones.index') }}" class="small">Ver todas</a>
+                                </div>
+
+                                @forelse ($ultimas as $n)
+                                    <a href="{{ route('notificaciones.abrir', $n->id) }}" class="dropdown-item text-wrap border-bottom py-2 {{ $n->read_at ? '' : 'bg-light fw-semibold' }}">
+                                        <div class="small">
+                                            <span class="badge bg-{{ $coloresAviso[$n->data['nivel'] ?? 'info'] ?? 'primary' }}">&nbsp;</span>
+                                            {{ $n->data['titulo'] ?? 'Aviso' }}
+                                        </div>
+                                        <div class="small text-muted fw-normal">{{ \Illuminate\Support\Str::limit($n->data['mensaje'] ?? '', 90) }}</div>
+                                        <div class="small text-muted fw-normal">{{ $n->created_at->format('d/m/Y') }} @hora($n->created_at)</div>
+                                    </a>
+                                @empty
+                                    <div class="px-3 py-3 text-muted small">No tienes notificaciones.</div>
+                                @endforelse
+                            </div>
+                        </li>
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">{{ auth()->user()->name }}</a>
                             <ul class="dropdown-menu dropdown-menu-end">
@@ -60,6 +99,7 @@
                                 <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Perfil</a></li>
                                 @if (auth()->user()->rol !== 'administrador')
                                     <li><a class="dropdown-item" href="{{ route('cliente.tarjetas.index') }}">Mis tarjetas</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('buzon.mis') }}">Mis solicitudes</a></li>
                                     <li><a class="dropdown-item" href="{{ route('buzon.crear') }}">Buzón de sugerencias</a></li>
                                 @endif
                                 @if (auth()->user()->rol === 'dueño' && $config->whatsapp_soporte)

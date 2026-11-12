@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('contenido')
-    <h1 class="mb-4">Todos los negocios</h1>
+   <div class="d-flex justify-content-between align-items-center mb-4"><h1 class="mb-0">Todos los negocios</h1><a href="{{ route('admin.negocios.eliminados') }}" class="btn btn-outline-secondary">Ver eliminados</a></div>
 
     @if (session('exito'))
         <div class="alert alert-success">{{ session('exito') }}</div>

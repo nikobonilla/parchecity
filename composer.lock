@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f21cc797877e5511d1e9ba321262b44c",
+    "content-hash": "0aa278ed2b30db5af1b0d6bcea7bfefc",
     "packages": [
         {
             "name": "brick/math",
@@ -1057,6 +1057,72 @@
                 }
             ],
             "time": "2026-08-24T17:13:02+00:00"
+        },
+        {
+            "name": "jamesmosq/moonshine-colombia-municipios",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jamesmosq/municipios_colombia.git",
+                "reference": "b5d1c98b45b48fb27241002fc7707e8dd75668ee"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jamesmosq/municipios_colombia/zipball/b5d1c98b45b48fb27241002fc7707e8dd75668ee",
+                "reference": "b5d1c98b45b48fb27241002fc7707e8dd75668ee",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^8.0 || ^9.0 || ^10.0 || ^11.0",
+                "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0"
+            },
+            "suggest": {
+                "moonshine-software/moonshine": "Requerido para usar los campos y filtros en MoonShine Admin Panel"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Jamesmosq\\ColombiaFields\\ColombiaServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Jamesmosq\\ColombiaFields\\": "src/",
+                    "Jamesmosq\\ColombiaFields\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "James Mosquera",
+                    "email": "jamesmosqr@gmail.com"
+                }
+            ],
+            "description": "Selector encadenado Departamento → Municipio para Laravel y MoonShine con los 1.120 municipios oficiales de Colombia (códigos DANE/DIVIPOLA)",
+            "keywords": [
+                "Municipios",
+                "colombia",
+                "dane",
+                "departamentos",
+                "divipola",
+                "laravel",
+                "moonshine"
+            ],
+            "support": {
+                "issues": "https://github.com/jamesmosq/municipios_colombia/issues",
+                "source": "https://github.com/jamesmosq/municipios_colombia/tree/main"
+            },
+            "time": "2026-05-30T02:05:25+00:00"
         },
         {
             "name": "laravel/framework",
@@ -8408,7 +8474,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "jamesmosq/moonshine-colombia-municipios": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

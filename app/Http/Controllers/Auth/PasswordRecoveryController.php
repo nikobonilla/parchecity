@@ -51,7 +51,7 @@ class PasswordRecoveryController extends Controller
         $datos = $request->validate([
             'email' => 'required|email',
             'codigo' => 'required|digits:6',
-            'password' => 'required|confirmed|min:8',
+          'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
         ]);
 
         $registro = DB::table('password_reset_tokens')->where('email', $datos['email'])->first();

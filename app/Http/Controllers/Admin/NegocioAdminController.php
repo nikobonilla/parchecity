@@ -76,7 +76,11 @@ class NegocioAdminController extends Controller
             'nombre' => 'required|string|max:255',
             'tipo' => 'required|in:restaurante,hotel,motel',
             'direccion' => 'required|string|max:255',
-            'ubicacion' => 'nullable|string|max:255',
+            'departamento_id' => 'required|exists:departamentos,id',
+            'municipio_id' => 'required|exists:municipios,id',
+            'localidad_id' => 'nullable|exists:localidades,id',
+            'barrio' => 'nullable|string|max:120',
+            'indicaciones' => 'nullable|string|max:500',
             'descripcion' => 'required|string',
             'contacto' => 'required|string|max:255',
             'whatsapp' => 'nullable|string|max:20',
@@ -115,4 +119,20 @@ class NegocioAdminController extends Controller
 
         return back()->with('exito', $mensaje);
     }
+    public function eliminados()
+{
+    $negocios = Negocio::onlyTrashed()->with('duenio')->orderByDesc('deleted_at')->paginate(20);
+
+    return view('admin.negocios.eliminados', compact('negocios'));
+}
+
+public function restaurar(int $id)
+{
+    $negocio = Negocio::onlyTrashed()->findOrFail($id);
+    $negocio->restore();
+
+    return redirect()
+        ->route('admin.negocios.eliminados')
+        ->with('exito', "Negocio {$negocio->codigo()} restaurado. Sus reservas canceladas siguen canceladas.");
+}
 }
